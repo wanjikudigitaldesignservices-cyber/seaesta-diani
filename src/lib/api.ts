@@ -114,6 +114,19 @@ export function isRangeAvailable(
   return true;
 }
 
+export function addMockBooking(unitId: string, startDate: string, endDate: string) {
+  if (!isSupabaseConfigured()) {
+    MOCK_AVAILABILITY_BLOCKS.push({
+      id: 'mock-' + Date.now(),
+      unit_id: unitId,
+      start_date: startDate,
+      end_date: endDate,
+      source: 'direct',
+      created_at: new Date().toISOString(),
+    });
+  }
+}
+
 // ---- Bookings (will call Edge Functions in production) ----
 
 export async function createBooking(data: {

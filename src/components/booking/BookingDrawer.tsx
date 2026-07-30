@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { X, Phone, Mail, User, Users, MessageSquare, Check } from 'lucide-react';
 import { differenceInDays, format } from 'date-fns';
 import type { Unit } from '@/lib/types';
-import { createBooking } from '@/lib/api';
+import { addMockBooking } from '@/lib/api';
 import { cn } from '@/lib/utils';
 
 interface BookingDrawerProps {
@@ -11,6 +11,7 @@ interface BookingDrawerProps {
   checkOut: Date | null;
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
 export function BookingDrawer({
@@ -19,6 +20,7 @@ export function BookingDrawer({
   checkOut,
   isOpen,
   onClose,
+  onSuccess,
 }: BookingDrawerProps) {
   const [formData, setFormData] = useState({
     guest_name: '',
@@ -35,7 +37,7 @@ export function BookingDrawer({
     checkIn && checkOut ? differenceInDays(checkOut, checkIn) : 0;
   const totalPrice = nights * unit.price_per_night;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!checkIn || !checkOut || nights < 1) return;
     if (!formData.dpa_consent) {
@@ -43,26 +45,38 @@ export function BookingDrawer({
       return;
     }
 
-    setStatus('submitting');
     setErrorMsg('');
 
-    try {
-      await createBooking({
-        unit_id: unit.id,
-        guest_name: formData.guest_name,
-        guest_email: formData.guest_email,
-        guest_phone: formData.guest_phone,
-        num_guests: formData.num_guests,
-        special_requests: formData.special_requests || undefined,
-        check_in: format(checkIn, 'yyyy-MM-dd'),
-        check_out: format(checkOut, 'yyyy-MM-dd'),
-        dpa_consent: formData.dpa_consent,
-      });
-      setStatus('success');
-    } catch {
-      setStatus('error');
-      setErrorMsg('Booking failed. Please try again.');
-    }
+    const message = `Hi Seaesta Studios! I would like to book a unit.
+
+*Details:*
+- Unit: ${unit.name}
+- Check-in: ${format(checkIn, 'MMM d, yyyy')}
+- Check-out: ${format(checkOut, 'MMM d, yyyy')}
+- Nights: ${nights}
+- Guests: ${formData.num_guests}
+
+*Guest Info:*
+- Name: ${formData.guest_name}
+- Email: ${formData.guest_email}
+- Phone: ${formData.guest_phone}
+${formData.special_requests ? `\n*Special Requests:*\n${formData.special_requests}` : ''}
+
+*Total Estimated Price:* KES ${totalPrice.toLocaleString()}`;
+
+    const phoneNumber = '254740396075';
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+    
+    // Add mock booking to local data so calendar blocks out immediately
+    addMockBooking(
+      unit.id,
+      format(checkIn, 'yyyy-MM-dd'),
+      format(checkOut, 'yyyy-MM-dd')
+    );
+    
+    window.open(whatsappUrl, '_blank');
+    setStatus('success');
+    if (onSuccess) onSuccess();
   };
 
   if (!isOpen) return null;
@@ -108,9 +122,7 @@ export function BookingDrawer({
               Booking Confirmed!
             </h4>
             <p className="text-sm text-reef-deep/60">
-              Demo mode — in production, you'd receive an M-Pesa STK push to
-              confirm payment. A confirmation email would be sent to{' '}
-              {formData.guest_email}.
+              We've opened WhatsApp with your booking details! Simply send the message to confirm your dates with us.
             </p>
             <button
               type="button"
@@ -262,20 +274,15 @@ export function BookingDrawer({
               type="submit"
               disabled={status === 'submitting' || nights < 1}
               className={cn(
-                'w-full rounded-xl py-3.5 text-sm font-bold transition-all',
-                status === 'submitting'
-                  ? 'cursor-wait bg-seafoam/50 text-white'
-                  : 'bg-baobab-coral text-white shadow-lg hover:bg-baobab-coral/90 hover:shadow-xl'
+                'flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold transition-all',
+                nights < 1
+                  ? 'cursor-not-allowed bg-reef-deep/10 text-reef-deep/40'
+                  : 'bg-[#25D366] text-white shadow-lg hover:bg-[#25D366]/90 hover:shadow-xl'
               )}
             >
-              {status === 'submitting'
-                ? 'Sending M-Pesa push...'
-                : `Pay KES ${totalPrice.toLocaleString()} via M-Pesa`}
+              <MessageSquare className="h-5 w-5" />
+              Send Booking via WhatsApp
             </button>
-
-            <p className="text-center text-xs text-reef-deep/40">
-              🔒 Sandbox mode — no real payment will be processed
-            </p>
           </form>
         )}
       </div>

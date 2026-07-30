@@ -14,10 +14,8 @@ export const BookingFormSchema = z.object({
   check_in: z.string().min(1, 'Check-in date is required'),
   check_out: z.string().min(1, 'Check-out date is required'),
   unit_id: z.string().uuid(),
-  dpa_consent: z.literal(true, {
-    errorMap: () => ({
-      message: 'You must consent to data processing under the Kenya DPA 2019',
-    }),
+  dpa_consent: z.boolean().refine((val) => val === true, {
+    message: 'You must consent to data processing under the Kenya DPA 2019',
   }),
 });
 

@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
+import { WhatsAppWidget } from './WhatsAppWidget';
 
 export function PageLayout() {
   return (
@@ -10,6 +11,7 @@ export function PageLayout() {
         <Outlet />
       </main>
       <Footer />
+      <WhatsAppWidget />
     </div>
   );
 }

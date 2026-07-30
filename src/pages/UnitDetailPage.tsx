@@ -259,6 +259,13 @@ export function UnitDetailPage() {
         checkOut={checkOut}
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
+        onSuccess={() => {
+          // Re-fetch blocks to show new mock booking
+          fetchAvailability(unit.id).then(setBlocks);
+          // Optional: clear selection
+          setCheckIn(null);
+          setCheckOut(null);
+        }}
       />
     </div>
   );
