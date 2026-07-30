@@ -114,9 +114,23 @@ export function isRangeAvailable(
   return true;
 }
 
+export function getLocalMockBlocks(): AvailabilityBlock[] {
+  try {
+    const stored = localStorage.getItem('seaesta_mock_bookings');
+    if (stored) {
+      return JSON.parse(stored) as AvailabilityBlock[];
+    }
+  } catch (e) {
+    console.error('Failed to parse local bookings', e);
+  }
+  // Initialize with the static mock data if no local storage
+  return [...MOCK_AVAILABILITY_BLOCKS];
+}
+
 export function addMockBooking(unitId: string, startDate: string, endDate: string) {
   if (!isSupabaseConfigured()) {
-    MOCK_AVAILABILITY_BLOCKS.push({
+    const currentBlocks = getLocalMockBlocks();
+    currentBlocks.push({
       id: 'mock-' + Date.now(),
       unit_id: unitId,
       start_date: startDate,
@@ -124,6 +138,8 @@ export function addMockBooking(unitId: string, startDate: string, endDate: strin
       source: 'direct',
       created_at: new Date().toISOString(),
     });
+    // Save back to local storage
+    localStorage.setItem('seaesta_mock_bookings', JSON.stringify(currentBlocks));
   }
 }
 
