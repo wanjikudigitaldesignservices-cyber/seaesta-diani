@@ -16,7 +16,7 @@ import {
   Dumbbell,
   ChevronLeft,
 } from 'lucide-react';
-import { fetchUnitBySlug, fetchAvailability } from '@/lib/api';
+import { fetchUnitBySlug, fetchAvailability, isRangeAvailable } from '@/lib/api';
 import type { Unit, AvailabilityBlock } from '@/lib/types';
 import { TideCalendar } from '@/components/booking/TideCalendar';
 import { BookingDrawer } from '@/components/booking/BookingDrawer';
@@ -239,12 +239,14 @@ export function UnitDetailPage() {
               {/* Book button */}
               <button
                 type="button"
-                disabled={!checkIn || !checkOut}
+                disabled={!checkIn || !checkOut || !isRangeAvailable(checkIn, checkOut, blocks)}
                 onClick={() => setDrawerOpen(true)}
                 className="mt-6 w-full rounded-xl bg-baobab-coral py-4 text-base font-bold text-white shadow-lg transition-all hover:bg-baobab-coral/90 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {checkIn && checkOut
-                  ? 'Book This Unit'
+                  ? isRangeAvailable(checkIn, checkOut, blocks) 
+                    ? 'Book This Unit' 
+                    : 'Dates Unavailable'
                   : 'Select dates to book'}
               </button>
             </div>

@@ -13,7 +13,7 @@ import {
 } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { AvailabilityBlock } from '@/lib/types';
-import { isDateBlocked } from '@/lib/api';
+import { isDateBlocked, isRangeAvailable } from '@/lib/api';
 import { cn } from '@/lib/utils';
 
 interface TideCalendarProps {
@@ -70,7 +70,13 @@ export function TideCalendar({
         if (isBefore(day, selectedCheckIn)) {
           onSelectRange(day, null);
         } else {
-          onSelectRange(selectedCheckIn, day);
+          // Check if the range between selectedCheckIn and day is clear
+          if (isRangeAvailable(selectedCheckIn, day, blocks)) {
+            onSelectRange(selectedCheckIn, day);
+          } else {
+            // Range is not clear, reset selection to the newly clicked day
+            onSelectRange(day, null);
+          }
         }
       }
     },
@@ -172,10 +178,10 @@ export function TideCalendar({
               disabled={isPast || !!block}
               onClick={() => handleDayClick(day)}
               className={cn(
-                'relative aspect-square rounded-lg text-sm font-medium transition-all',
+                'relative aspect-square rounded-lg text-sm font-medium transition-all overflow-hidden',
                 !inMonth && 'opacity-30',
                 isPast && 'cursor-not-allowed opacity-30',
-                block && SOURCE_COLORS[block.source],
+                block && [SOURCE_COLORS[block.source], 'opacity-80 text-reef-deep/40'],
                 block && 'cursor-not-allowed',
                 !block && !isPast && 'hover:bg-seafoam/20 cursor-pointer',
                 inRange && !block && 'bg-seafoam/30 text-reef-deep',
@@ -184,11 +190,17 @@ export function TideCalendar({
               )}
             >
               <span className="relative z-10">{format(day, 'd')}</span>
+              {/* Diagonal Strikethrough for booked dates */}
+              {block && (
+                <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
+                  <div className="w-[120%] h-[2px] bg-red-800/60 -rotate-45 transform origin-center rounded-full" />
+                </div>
+              )}
               {/* Wave swell for booked dates */}
               {block && (
                 <div className="absolute bottom-0 left-0 right-0 h-1 rounded-b-lg">
                   <svg
-                    className="h-full w-full"
+                    className="h-full w-full opacity-60"
                     viewBox="0 0 40 4"
                     preserveAspectRatio="none"
                   >
