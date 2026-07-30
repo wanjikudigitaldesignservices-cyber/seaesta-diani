@@ -86,7 +86,7 @@ export async function fetchAvailability(
   }
   const { data, error } = await supabase
     .from('availability_blocks')
-    .select('id, unit_id, start_date, end_date, source, created_at')
+    .select('*')
     .eq('unit_id', unitId)
     .gte('end_date', new Date().toISOString().split('T')[0]);
   if (error) throw error;
@@ -129,8 +129,18 @@ export function getLocalMockBlocks(): AvailabilityBlock[] {
   return [...MOCK_AVAILABILITY_BLOCKS];
 }
 
-export function addMockBooking(unitId: string, startDate: string, endDate: string) {
-  if (!isSupabaseConfigured()) {
+export async function addMockBooking(unitId: string, startDate: string, endDate: string) {
+  if (isSupabaseConfigured()) {
+    const { error } = await supabase.from('availability_blocks').insert({
+      unit_id: unitId,
+      start_date: startDate,
+      end_date: endDate,
+      source: 'direct'
+    });
+    if (error) {
+      console.error('Error inserting booking into Supabase:', error);
+    }
+  } else {
     const currentBlocks = getLocalMockBlocks();
     currentBlocks.push({
       id: 'mock-' + Date.now(),

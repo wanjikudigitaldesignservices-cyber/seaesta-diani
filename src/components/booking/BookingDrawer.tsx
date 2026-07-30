@@ -37,7 +37,7 @@ export function BookingDrawer({
     checkIn && checkOut ? differenceInDays(checkOut, checkIn) : 0;
   const totalPrice = nights * unit.price_per_night;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!checkIn || !checkOut || nights < 1) return;
     if (!formData.dpa_consent) {
@@ -46,6 +46,7 @@ export function BookingDrawer({
     }
 
     setErrorMsg('');
+    setStatus('submitting');
 
     const message = `Hi Seaesta Studios! I would like to book a unit.
 
@@ -67,8 +68,8 @@ ${formData.special_requests ? `\n*Special Requests:*\n${formData.special_request
     const phoneNumber = '254740396075';
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
     
-    // Add mock booking to local data so calendar blocks out immediately
-    addMockBooking(
+    // Add mock booking to local data or Supabase so calendar blocks out immediately
+    await addMockBooking(
       unit.id,
       format(checkIn, 'yyyy-MM-dd'),
       format(checkOut, 'yyyy-MM-dd')
