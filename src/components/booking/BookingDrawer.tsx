@@ -65,7 +65,7 @@ ${formData.special_requests ? `\n*Special Requests:*\n${formData.special_request
 
 *Total Estimated Price:* KES ${totalPrice.toLocaleString()}`;
 
-    const phoneNumber = '254740396075';
+    const phoneNumber = '254721141955';
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
     
     // Add mock booking to local data or Supabase so calendar blocks out immediately

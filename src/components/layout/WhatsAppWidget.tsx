@@ -11,7 +11,7 @@ export function WhatsAppWidget() {
     return () => clearTimeout(timer);
   }, []);
 
-  const phoneNumber = '254740396075';
+  const phoneNumber = '254721141955';
   const message = encodeURIComponent("Hi Seaesta Studios! I'd like to make a booking inquiry.");
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
 
