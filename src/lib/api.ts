@@ -97,8 +97,10 @@ export function isDateBlocked(
   date: Date,
   blocks: AvailabilityBlock[]
 ): AvailabilityBlock | undefined {
-  const ds = date.toISOString().split('T')[0];
-  return blocks.find((b) => ds >= b.start_date && ds <= b.end_date);
+  // Use local time instead of UTC to avoid timezone offset bugs
+  const offset = date.getTimezoneOffset() * 60000;
+  const localISOTime = (new Date(date.getTime() - offset)).toISOString().split('T')[0];
+  return blocks.find((b) => localISOTime >= b.start_date && localISOTime <= b.end_date);
 }
 
 export function isRangeAvailable(

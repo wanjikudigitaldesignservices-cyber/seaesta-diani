@@ -200,7 +200,8 @@ export const MOCK_UNITS: Unit[] = [
 // Generate some mock availability blocks for demo
 const today = new Date();
 function dateStr(d: Date): string {
-  return d.toISOString().split('T')[0];
+  const offset = d.getTimezoneOffset() * 60000;
+  return new Date(d.getTime() - offset).toISOString().split('T')[0];
 }
 function addDays(d: Date, n: number): Date {
   const r = new Date(d);
